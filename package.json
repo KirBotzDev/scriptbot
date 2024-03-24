@@ -10,7 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@adiwajshing/baileys": "npm:@whiskeysockets/baileys@latest",
+    "@adiwajshing/baileys": "github:@KirBotzDev/Baileys",
     "@adiwajshing/keyed-db": "^0.2.4",
     "@xct007/tiktok-scraper": "^0.0.3",
     "api-dylux": "^1.7.2",
