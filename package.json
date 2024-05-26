@@ -10,7 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@adiwajshing/baileys": "github:@KirBotzDev/Baileys",
+    "@adiwajshing/baileys": "npm:@ferdiz-afk/baileys@latest",
     "@adiwajshing/keyed-db": "^0.2.4",
     "@xct007/tiktok-scraper": "^0.0.3",
     "api-dylux": "^1.7.2",
@@ -29,6 +29,7 @@
     "moment-timezone": "^0.5.34",
     "node-fetch": "^2.6.7",
     "node-webpmux": "^3.1.0",
+    "object-query-string": "^1.2.0",
     "performance-now": "^2.1.0",
     "qrcode-terminal": "^0.12.0",
     "readline": "^1.3.0",

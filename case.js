@@ -1,7 +1,7 @@
 module.exports = async(x, nx, store) => {
 try {
   const type = Object.keys(nx.message)[0]
-  const body = (nx.mtype === 'conversation') ? nx.message.conversation : (nx.mtype == 'imageMessage') ? nx.message.imageMessage.caption : (nx.mtype == 'videoMessage') ? nx.message.videoMessage.caption : (nx.mtype == 'extendedTextMessage') ? nx.message.extendedTextMessage.text : (nx.mtype == 'buttonsResponseMessage') ? nx.message.buttonsResponseMessage.selectedButtonId : (nx.mtype == 'listResponseMessage') ? nx.message.listResponseMessage.singleSelectReply.selectedRowId : (nx.mtype == 'templateButtonReplyMessage') ? nx.message.templateButtonReplyMessage.selectedId : (nx.mtype === 'messageContextInfo') ? (nx.message.buttonsResponseMessage?.selectedButtonId || nx.message.listResponseMessage?.singleSelectReply.selectedRowId || nx.text) : ''
+  const body = (nx.mtype === 'conversation') ? nx.message.conversation : (nx.mtype == 'imageMessage') ? nx.message.imageMessage.caption : (nx.mtype == 'videoMessage') ? nx.message.videoMessage.caption : (nx.mtype == 'extendedTextMessage') ? nx.message.extendedTextMessage.text : (nx.mtype == 'buttonsResponseMessage') ? nx.message.buttonsResponseMessage.selectedButtonId : (nx.mtype == 'listResponseMessage') ? nx.message.listResponseMessage.singleSelectReply.selectedRowId : (nx.mtype == 'templateButtonReplyMessage') ? nx.message.templateButtonReplyMessage.selectedId : (nx.mtype == 'interactiveResponseMessage') ? JSON.parse(nx.msg.nativeFlowResponseMessage.paramsJson).id : (nx.mtype == 'templateButtonReplyMessage') ? nx.msg.selectedId : (nx.mtype === 'messageContextInfo') ? (nx.message.buttonsResponseMessage?.selectedButtonId || nx.message.listResponseMessage?.singleSelectReply.selectedRowId || nx.text) : ''
   const prefix = /^[.#!/^]/.test(body) ? body.match(/^[.#!/^]/gi) : '#'
   const isCmd = body.startsWith(prefix)
   const command = isCmd ? body.slice(prefix.length).trim().split(' ').shift().toLowerCase() : ''
@@ -48,6 +48,27 @@ END:VCARD`
 })
 }
 
+const Styles = (text, style = 1) => {
+  var xStr = 'abcdefghijklmnopqrstuvwxyz1234567890'.split('');
+  var yStr = {
+    1: 'ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘqʀꜱᴛᴜᴠᴡxʏᴢ1234567890'
+  };
+  var replacer = [];
+  xStr.map((v, i) =>
+    replacer.push({
+      original: v,
+      convert: yStr[style].split('')[i]
+    })
+  );
+  var str = text.toLowerCase().split('');
+  var output = [];
+  str.map((v) => {
+    const find = replacer.find((x) => x.original == v);
+    find ? output.push(find.convert) : output.push(v);
+  });
+  return output.join('');
+}
+
 if (isAlreadyResponList(nx.chat, body.toLowerCase(), listdb)) {
   var get_data_respon = getDataResponList(nx.chat, body.toLowerCase(), listdb)
   if (get_data_respon.isImage === false) {
@@ -69,112 +90,251 @@ if (nx.isGroup && isBotAdmins && !nx.key.fromMe && isAntilink) {
 }
 
 switch (command) {
+
 case "menu": {
-  const noOwne = global.nomorOwner + "@s.whatsapp.net"
-  const timestamp = speed()
-  const latensi = speed() - timestamp
-  const textcap = `❃ ━━━ *INFORMASI* ━━━ ❃
-⌬〡Nama Owner : ${namaOwner}
-⌬〡Nomor Owner : @${noOwne.split("@")[0]}
-⌬〡Nomor User : @${sender.split("@")[0]}
-⌬〡Nama User : ${nx.pushName}
-⌬〡Runtime : ${runtime(process.uptime())}
-⌬〡Speed : ${latensi.toFixed(4)} 𝘋𝘦𝘵𝘪𝘬
-⌬〡Date : ${tanggal(new Date())}
-⌬〡Time : ${jam} WIB
-━━━━━━━━━━━━━━━
-*LIST MENU*
-${prefix}pushkonmenu
-${prefix}addlistmenu
-${prefix}othermenu
-${prefix}ownermenu
-${prefix}groupmenu
-${prefix}downloadmenu
-${prefix}jadibotmenu
-━━━━━━━━━━━━━━━`
-  x.sendMessage(from, { image: thumb, caption: textcap, fileLength: "1000000000000000", mentions: [sender, noOwne] }, { quoted: nx })
+let wek = "List Menu Di Bawah Kak Silahkan Di Click"
+let sections = [
+{
+title: 'List Menu 1',
+highlight_label: 'Copyright By KirBotz',
+rows: [{ title: 'MENU PUSHKONTAK', id: '.pushkonmenu' }]
+},
+{
+title: 'List Menu 2',
+highlight_label: 'Copyright By KirBotz',
+rows: [{ title: 'MENU ADDLIST', id: '.addlistmenu' }]
+},
+{
+title: 'List Menu 3',
+highlight_label: 'Copyright By KirBotz',
+rows: [{ title: 'MENU OTHER', id: '.othermenu' }]
+},
+{
+title: 'List Menu 4',
+highlight_label: 'Copyright By KirBotz',
+rows: [{ title: 'MENU OWNER', id: '.ownermenu' }]
+},
+{
+title: 'List Menu 5',
+highlight_label: 'Copyright By KirBotz',
+rows: [{ title: 'MENU GROUP', id: '.groupmenu' }]
+},
+{
+title: 'List Menu 6',
+highlight_label: 'Copyright By KirBotz',
+rows: [{ title: 'MENU DOWNLOAD', id: '.downloadmenu' }]
+},
+{
+title: 'List Menu 7',
+highlight_label: 'Copyright By KirBotz',
+rows: [{ title: 'MENU JADIBOT', id: '.jadibotmenu' }]
+},
+{
+title: 'List Menu 8',
+highlight_label: 'Copyright By KirBotz',
+rows: [{ title: 'MENU PHOTOOXY', id: '.photooxymenu' }]
+}
+]
+let listMessage = { title: 'LIST MENU', sections }
+let msg = generateWAMessageFromContent(nx.chat, {
+viewOnceMessage: { message: { "messageContextInfo": { "deviceListMetadata": {}, "deviceListMetadataVersion": 2 },
+interactiveMessage: proto.Message.InteractiveMessage.create({
+contextInfo: {
+mentionedJid: [nx.sender],
+forwardingScore: 9999999,
+isForwarded: true,
+forwardedNewsletterMessageInfo: {
+newsletterJid: '120363196790225702@newsletter',
+newsletterName: 'Saluran WhatsApp KirBotz', 
+serverMessageId: -1
+},
+businessMessageForwardInfo: { businessOwnerJid: x.decodeJid(x.user.id) },
+}, 
+body: proto.Message.InteractiveMessage.Body.create({
+text: wek
+}),
+footer: proto.Message.InteractiveMessage.Footer.create({
+text: Styles('bot whatsapp by kirbotz')
+}),
+header: proto.Message.InteractiveMessage.Header.create({
+title: `Hallo Kak @${nx.sender.split('@')[0]}\n`,
+subtitle: "",
+hasMediaAttachment: true,...(await prepareWAMessageMedia({ image: thumb }, { upload: x.waUploadToServer }))
+}),
+nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
+buttons: [ 
+{
+"name": "single_select",
+"buttonParamsJson": JSON.stringify(listMessage) 
+},
+{
+"name": "cta_url",
+"buttonParamsJson": "{\"display_text\":\"CREATOR\",\"url\":\"https://wa.me/6287705048235\",\"merchant_url\":\"https://wa.me/6289512422017\"}"
+},
+{
+"name": "quick_reply",
+"buttonParamsJson": "{\"display_text\":\"BELI PREMIUM\",\"id\":\".owner\"}"
+},
+],
+})
+})
+}
+}
+}, {})
+await x.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id })
 }
 break
 case "jadibotmenu": {
-  const jadi = `*〡 JADIBOT MENU 〡*
-◈ ${prefix}jadibot
-◈ ${prefix}stopjadibot
-◈ ${prefix}listjadibot`
+  const jadi = "╭──❒ `JADIBOT`\n" + `│⭔${prefix}jadibot
+│⭔${prefix}stopjadibot
+│⭔${prefix}listjadibot
+╰────────────❒`
   x.sendMessage(from, { text: jadi, contextInfo: { forwardingScore: 9999999,  isForwarded: true }}, { quoted: nx })
 }
 break
 case "downloadmenu": {
-  const down = `*〡 DOWNLOAD MENU 〡*
-◈ ${prefix}tiktok *link*
-◈ ${prefix}ytmp3 *link*
-◈ ${prefix}ytmp4 *link*
-◈ ${prefix}playmp3 *query*
-◈ ${prefix}playmp4 *query*`
+  const down = "╭──❒ `DOWNLOAD`\n" + `│⭔${prefix}tiktok *link*
+│⭔${prefix}ytmp3 *link*
+│⭔${prefix}ytmp4 *link*
+│⭔${prefix}playmp3 *query*
+│⭔${prefix}playmp4 *query*
+╰────────────❒`
   x.sendMessage(from, { text: down, contextInfo: { forwardingScore: 9999999,  isForwarded: true }}, { quoted: nx })
 }
 break
 case "groupmenu": {
-  const grou = `*〡 GROUP MENU 〡*
-◈ ${prefix}antilink
-◈ ${prefix}welcome
-◈ ${prefix}hidetag
-◈ ${prefix}add
-◈ ${prefix}kick
-◈ ${prefix}close
-◈ ${prefix}open
-◈ ${prefix}opentime
-◈ ${prefix}closetime
-◈ ${prefix}setnamagc
-◈ ${prefix}setdeskgc
-◈ ${prefix}linkgc
-◈ ${prefix}resetlinkgc`
+  const grou = "╭──❒ `GROUP`\n" + `│⭔${prefix}antilink
+│⭔${prefix}welcome
+│⭔${prefix}hidetag
+│⭔${prefix}add
+│⭔${prefix}kick
+│⭔${prefix}close
+│⭔${prefix}open
+│⭔${prefix}opentime
+│⭔${prefix}closetime
+│⭔${prefix}setnamagc
+│⭔${prefix}setdeskgc
+│⭔${prefix}linkgc
+│⭔${prefix}resetlinkgc
+╰────────────❒`
   x.sendMessage(from, { text: grou, contextInfo: { forwardingScore: 9999999,  isForwarded: true }}, { quoted: nx })
 }
 break
 case "ownermenu": {
-  const owne = `*〡 OWNER MENU 〡*
-◈ ${prefix}eval *code*
-◈ ${prefix}exec *code*
-◈ ${prefix}join *linkgc*
-◈ ${prefix}listpremium
-◈ ${prefix}addprem *62×××××*
-◈ ${prefix}delprem *62×××××*
-◈ ${prefix}getcase *owner*
-◈ ${prefix}creategc *nama*
-◈ ${prefix}broadcast *teks|5*`
+  const owne = "╭──❒ `OWNER`\n" + `│⭔${prefix}eval *code*
+│⭔${prefix}exec *code*
+│⭔${prefix}join *linkgc*
+│⭔${prefix}listpremium
+│⭔${prefix}addprem *62×××××*
+│⭔${prefix}delprem *62×××××*
+│⭔${prefix}getcase *owner*
+│⭔${prefix}creategc *nama*
+│⭔${prefix}broadcast *teks|5*
+╰────────────❒`
   x.sendMessage(from, { text: owne, contextInfo: { forwardingScore: 9999999,  isForwarded: true }}, { quoted: nx })
 }
 break
 case "othermenu": {
-  const othe = `*〡 OTHER MENU 〡*
-◈ ${prefix}owner
-◈ ${prefix}sticker
-◈ ${prefix}toimg
-◈ ${prefix}tourl
-◈ ${prefix}hd
-◈ ${prefix}qc
-◈ ${prefix}speedtest
-◈ ${prefix}ping`
+  const othe = "╭──❒ `OTHER`\n" + `│⭔${prefix}owner
+│⭔${prefix}sticker
+│⭔${prefix}toimg
+│⭔${prefix}tourl
+│⭔${prefix}hd
+│⭔${prefix}qc
+│⭔${prefix}speedtest
+│⭔${prefix}ping
+╰────────────❒`
   x.sendMessage(from, { text: othe, contextInfo: { forwardingScore: 9999999,  isForwarded: true }}, { quoted: nx })
 }
 break
 case "addlistmenu": {
-  const addl = `*〡 ADDLIST MENU 〡*
-◈ ${prefix}list
-◈ ${prefix}addlist *key,teks*
-◈ ${prefix}updatelist *key,teks*
-◈ ${prefix}dellist *key*`
+  const addl = "╭──❒ `ADD LIST`\n" + `│⭔${prefix}list
+│⭔${prefix}addlist *key,teks*
+│⭔${prefix}updatelist *key,teks*
+│⭔${prefix}dellist *key*
+╰────────────❒`
   x.sendMessage(from, { text: addl, contextInfo: { forwardingScore: 9999999,  isForwarded: true }}, { quoted: nx })
 }
 break
 case "pushkonmenu": {
-  const push = `*〡 PUSHKON MENU 〡*
-◈ ${prefix}idgroup
-◈ ${prefix}pushcontacts
-◈ ${prefix}pushcontactsid
-◈ ${prefix}savecontacts
-◈ ${prefix}savecontactsid`
+  const push = "╭──❒ `PUSHKONTAK`\n" + `│⭔${prefix}idgroup
+│⭔${prefix}pushcontacts
+│⭔${prefix}pushcontactsid
+│⭔${prefix}savecontacts
+│⭔${prefix}savecontactsid
+╰────────────❒`
   x.sendMessage(from, { text: push, contextInfo: { forwardingScore: 9999999,  isForwarded: true }}, { quoted: nx })
+}
+break
+case "photooxymenu": {
+  const pho = "╭──❒ `PHOTOOXY`\n" + `│⭔${prefix}qc *teks*
+│⭔${prefix}createqr *teks*
+│⭔${prefix}detectqr *reply image*
+│⭔${prefix}sticker *reply image*
+│⭔${prefix}shadow *teks*
+│⭔${prefix}write *teks*
+│⭔${prefix}romantic *teks*
+│⭔${prefix}burnpaper *teks*
+│⭔${prefix}smoke *teks*
+│⭔${prefix}narutobanner *teks*
+│⭔${prefix}love *teks*
+│⭔${prefix}undergrass *teks*
+│⭔${prefix}doublelove *teks*
+│⭔${prefix}coffecup *teks*
+│⭔${prefix}underwaterocean *teks*
+│⭔${prefix}smokyneon *teks*
+│⭔${prefix}starstext *teks*
+│⭔${prefix}rainboweffect *teks*
+│⭔${prefix}balloontext *teks*
+│⭔${prefix}metalliceffect *teks*
+│⭔${prefix}embroiderytext *teks*
+│⭔${prefix}flamingtext *teks*
+│⭔${prefix}stonetext *teks*
+│⭔${prefix}writeart *teks*
+│⭔${prefix}summertext *teks*
+│⭔${prefix}wolfmetaltext *teks*
+│⭔${prefix}nature3dtext *teks*
+│⭔${prefix}rosestext *teks*
+│⭔${prefix}naturetypography *teks*
+│⭔${prefix}quotesunder *teks*
+│⭔${prefix}shinetext *teks*
+╰────────────❒`
+  x.sendMessage(from, { text: pho, contextInfo: { forwardingScore: 9999999, isForwarded: true }}, { quoted: nx })
+}
+break
+case "shadow": case "write": case "romantic": case "burnpaper": case "smoke": case "narutobanner": case "love": case "undergrass": case "doublelove": case "coffecup": case "underwaterocean": case "smokyneon": case "starstext": case "rainboweffect": case "balloontext": case "metalliceffect": case "embroiderytext": case "flamingtext": case "stonetext": case "writeart": case "summertext": case "wolfmetaltext": case "nature3dtext": case "rosestext": case "naturetypography": case "quotesunder": case "shinetext": {
+if (!isPremium) return reply("Kamu Belum Menjadi User Premium Silahkan Beli Premium Ke Owner Dengan Ketik .owner")
+if (!q) return reply(`Example : ${prefix+command} KirBotz`)
+let link
+if (/stonetext/.test(command)) link = 'https://photooxy.com/online-3d-white-stone-text-effect-utility-411.html'
+if (/writeart/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/write-art-quote-on-wood-heart-370.html'
+if (/summertext/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/3d-summer-text-effect-367.html'
+if (/wolfmetaltext/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/create-a-wolf-metal-text-effect-365.html'
+if (/nature3dtext/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/make-nature-3d-text-effects-364.html'
+if (/rosestext/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/yellow-roses-text-360.html'
+if (/naturetypography/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/create-vector-nature-typography-355.html'
+if (/quotesunder/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/quotes-under-fall-leaves-347.html'
+if (/shinetext/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/rainbow-shine-text-223.html'
+if (/shadow/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/shadow-text-effect-in-the-sky-394.html'
+if (/write/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/write-text-on-the-cup-392.html'
+if (/romantic/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/romantic-messages-for-your-loved-one-391.html'
+if (/burnpaper/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/write-text-on-burn-paper-388.html'
+if (/smoke/.test(command)) link = 'https://photooxy.com/other-design/create-an-easy-smoke-type-effect-390.html'
+if (/narutobanner/.test(command)) link = 'https://photooxy.com/manga-and-anime/make-naruto-banner-online-free-378.html'
+if (/love/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/create-a-picture-of-love-message-377.html'
+if (/undergrass/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/make-quotes-under-grass-376.html'
+if (/doublelove/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/love-text-effect-372.html'
+if (/coffecup/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/put-any-text-in-to-coffee-cup-371.html'
+if (/underwaterocean/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/creating-an-underwater-ocean-363.html'
+if (/smokyneon/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/make-smoky-neon-glow-effect-343.html'
+if (/starstext/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/write-stars-text-on-the-night-sky-200.html'
+if (/rainboweffect/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/glow-rainbow-effect-generator-201.html'
+if (/balloontext/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/royal-look-text-balloon-effect-173.html'
+if (/metalliceffect/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/illuminated-metallic-effect-177.html'
+if (/embroiderytext/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/create-embroidery-text-online-191.html'
+if (/flamingtext/.test(command)) link = 'https://photooxy.com/logo-and-text-effects/realistic-flaming-text-effect-online-197.html'
+let dehe = await photoOxy(link, q)
+x.sendMessage(from, { image: { url: dehe }, caption: `Sukses Kak` }, { quoted: nx })
 }
 break
 case "jadibot": {
@@ -288,8 +448,8 @@ break
 case "tiktok": {
   if (!isPremium) return reply("Kamu Belum Menjadi User Premium Silahkan Beli Premium Ke Owner Dengan Ketik .owner")
   if (!q) return reply(`Penggunaan Salah Contoh .${command} https://vm.tiktok.com/ZSLdF9NYN`)
-  let res = await api.tiktok(q)
-  let ghd = await x.sendMessage(from, {video:{url: res.hdplay},caption: "```Sukses Kak Tunggu Aja Audio Nya Di Bawah Yaa```"},{quoted:nx})
+  let res = await tikVideo(q)
+  let ghd = await x.sendMessage(from, {video:{url: res.hdplay},caption: `*Sukses Kak Tunggu Aja Audio Nya Di Bawah Yaa*\n> Jika Tidak Bisa Di Putar Download Video Di Sini ${res.play}`},{quoted:nx})
   x.sendMessage(from, {audio:{url: res.music}, mimetype: "audio/mp4", ptt:false},{quoted:ghd})
 }
 break
@@ -638,7 +798,7 @@ case "qc": {
     "type": "quote", 
     "format": "png", 
     "backgroundColor": 
-    "#FFFFFF", 
+    "#C0C0C0", 
     "width": 512, 
     "height": 768, 
     "scale": 2, 
@@ -660,7 +820,7 @@ case "qc": {
     headers: {'Content-Type': 'application/json'}
   }).then(res => {
     const buffer = Buffer.from(res.data.result.image, 'base64')
-    var opt = { packname: "", author: x.name }
+    var opt = { packname: "", author: "> by kirbotz\n087705048235" }
     x.sendStimg(from, buffer, nx, opt)
   })
 }
